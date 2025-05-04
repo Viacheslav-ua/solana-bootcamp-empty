@@ -5,6 +5,10 @@ import { PublicKey } from "@solana/web3.js";
 import escrowIdl from "./escrow.json";
 import { Escrow } from "./idlType";
 import { config } from "./config";
+import { randomBytes } from "crypto";
+import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+
+const TOKEN_PROGRAM = TOKEN_PROGRAM_ID
 
 export class EscrowProgram {
   protected program: Program<Escrow>;
@@ -38,6 +42,30 @@ export class EscrowProgram {
     tokenAmountB: number
   ) {
     try {
+      const offerId = new BN(randomBytes(8));
+      const offerAddress = this.createOfferId(offerId);
+
+      const vault = getAssociatedTokenAddressSync(
+        tokenMintA,
+        offerAddress,
+        true,
+        TOKEN_PROGRAM,
+      )
+
+      const makerTokenAccountA = getAssociatedTokenAddressSync(
+        tokenMintA,
+        this.wallet.publicKey,
+        true,
+        TOKEN_PROGRAM,
+      )
+
+      const makerTokenAccountB = getAssociatedTokenAddressSync(
+        tokenMintB,
+        this.wallet.publicKey,
+        true,
+        TOKEN_PROGRAM,
+      )
+
       console.log(tokenMintA, tokenMintB, tokenAmountA, tokenAmountB);
       return null;
     } catch (e) {
