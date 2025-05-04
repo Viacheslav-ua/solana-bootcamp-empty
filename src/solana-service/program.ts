@@ -7,6 +7,7 @@ import { Escrow } from "./idlType";
 import { config } from "./config";
 import { randomBytes } from "crypto";
 import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { tokenProgram } from "@metaplex-foundation/js";
 
 const TOKEN_PROGRAM = TOKEN_PROGRAM_ID
 
@@ -78,10 +79,10 @@ export class EscrowProgram {
 
       const txInstruction = await this.program.methods
         .makeOffer(offerId, new BN(tokenAmountA), new BN(tokenAmountB))
-        .accounts({...accounts, tokenProgram: TOKEN_PROGRAM})
+        .accounts({ ...accounts, tokenProgram: TOKEN_PROGRAM })
         .instruction();
 
-      
+
       const messageV0 = new web3.TransactionMessage({
         payerKey: this.wallet.publicKey,
         recentBlockhash: (await this.connection.getLatestBlockhash()).blockhash,
@@ -95,7 +96,7 @@ export class EscrowProgram {
       const response = await this.program.provider.sendAndConfirm(versionedTransaction);
 
       if (!this.program.provider.publicKey) return;
-      
+
       return response;
     } catch (e) {
       console.log(e);
@@ -110,8 +111,67 @@ export class EscrowProgram {
     tokenMintB: PublicKey
   ) {
     try {
-      console.log(maker, offer, tokenMintA, tokenMintB);
-      return null;
+
+      const takerTokenAccountA = getAssociatedTokenAddressSync(
+        tokenMintA,
+        this.wallet.publicKey,
+        true,
+        TOKEN_PROGRAM,
+      )
+
+      const takerTokenAccountB = getAssociatedTokenAddressSync(
+        tokenMintB,
+        maker,
+        true,
+        TOKEN_PROGRAM,
+      )
+
+      const makerTokenAccountB = getAssociatedTokenAddressSync(
+        tokenMintB,
+        this.wallet.publicKey,
+        true,
+        TOKEN_PROGRAM,
+      )
+
+      const vault = getAssociatedTokenAddressSync(
+        tokenMintA,
+        offer,
+        true,
+        TOKEN_PROGRAM,
+      )
+
+      const accounts = {
+        maker,
+        offer,
+        tokenMintA,
+        taker: this.wallet.publicKey,
+        takerTokenAccountA,
+        takerTokenAccountB,
+        vault,
+        tokenProgram: TOKEN_PROGRAM,
+        makerTokenAccountB,
+      }
+
+      const txInstruction = await this.program.methods
+        .takeOffer()
+        .accounts({ ...accounts })
+        .instruction();
+
+      const messageV0 = new web3.TransactionMessage({
+        payerKey: this.wallet.publicKey,
+        recentBlockhash: (await this.connection.getLatestBlockhash()).blockhash,
+        instructions: [txInstruction],
+      }).compileToV0Message();
+
+      const versionedTransaction = new web3.VersionedTransaction(messageV0);
+
+      if (!this.program.provider.sendAndConfirm) return;
+
+      const response = await this.program.provider.sendAndConfirm(versionedTransaction);
+
+      if (!this.program.provider.publicKey) return;
+
+      return response;
     } catch (e) {
       console.log(e);
       return null;
