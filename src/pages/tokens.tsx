@@ -7,8 +7,8 @@ import React, { useEffect, useState } from "react";
 
 
 type TokenData = {
-    mint: any;
-    amount: any;
+    mint: string;
+    amount: number;
     decimals: number;
 }
 

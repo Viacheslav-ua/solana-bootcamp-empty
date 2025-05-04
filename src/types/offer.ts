@@ -4,8 +4,8 @@ export interface Offer {
     trxHashOffer: string;
     trxHashTake?: string
 
-    tokenAOfferedAmount: BigInt;
-    tokenBWantedAmount: BigInt;
+    tokenAOfferedAmount: bigint;
+    tokenBWantedAmount: bigint;
 
     acctMaker: string;
     acctTaker?: string;

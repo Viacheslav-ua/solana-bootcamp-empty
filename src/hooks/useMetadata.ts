@@ -65,7 +65,7 @@ async function fetchTokenMetadata(
         ownerAddress?.owner
       );
 
-      let metadata: Partial<TokenMetadata> = {};
+      const metadata: Partial<TokenMetadata> = {};
 
       if (ownerAddress?.owner === TOKEN_2022_PROGRAM_ID) {
         const token2022Metadata = await getTokenMetadata(
@@ -127,7 +127,7 @@ async function fetchTokenMetadata(
         icon: metadata?.icon || "👁",
       };
     } catch (e) {
-      console.log("No Metaplex metadata found, using dummy data if available");
+      console.log("No Metaplex metadata found, using dummy data if available:", e);
 
       if (DUMMY_TOKENS[mintAddress]) {
         return DUMMY_TOKENS[mintAddress];

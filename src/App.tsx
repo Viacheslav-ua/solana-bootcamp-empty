@@ -82,7 +82,7 @@ const App: React.FC = () => {
       await connect();
       return;
     } catch (e) {
-      toast.error("Error connecting to wallet");
+      toast.error("Error connecting to wallet: " + e);
     }
   };
 
@@ -107,7 +107,7 @@ const App: React.FC = () => {
         new PublicKey(selectedOffer?.acctTokenMintB)
       );
     } catch (e) {
-      toast.error("Error taking offer");
+      toast.error("Error taking offer: " + e);
     } finally {
       await queryClient.invalidateQueries({ queryKey: ["offers"] });
       setLoading(false);

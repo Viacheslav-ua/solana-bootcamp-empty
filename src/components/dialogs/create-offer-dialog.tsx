@@ -91,7 +91,7 @@ export function CreateOfferDialog({
       setFormData(DEFAULT_FORM_DATA);
       setIsOpen(false);
     } catch (error) {
-      toast("Error creating Offer");
+      toast("Error creating Offer: " + error);
     } finally {
       await queryClient.invalidateQueries({ queryKey: ["offers"] });
       setIsSubmitting(false);
