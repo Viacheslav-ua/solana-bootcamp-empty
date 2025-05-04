@@ -66,8 +66,37 @@ export class EscrowProgram {
         TOKEN_PROGRAM,
       )
 
-      console.log(tokenMintA, tokenMintB, tokenAmountA, tokenAmountB);
-      return null;
+      const accounts = {
+        maker: this.wallet.publicKey,
+        tokenMintA,
+        makerTokenAccountA,
+        tokenMintB,
+        makerTokenAccountB,
+        vault,
+        offer: offerAddress,
+      }
+
+      const txInstruction = await this.program.methods
+        .makeOffer(offerId, new BN(tokenAmountA), new BN(tokenAmountB))
+        .accounts({...accounts, tokenProgram: TOKEN_PROGRAM})
+        .instruction();
+
+      
+      const messageV0 = new web3.TransactionMessage({
+        payerKey: this.wallet.publicKey,
+        recentBlockhash: (await this.connection.getLatestBlockhash()).blockhash,
+        instructions: [txInstruction],
+      }).compileToV0Message();
+
+      const versionedTransaction = new web3.VersionedTransaction(messageV0);
+
+      if (!this.program.provider.sendAndConfirm) return;
+
+      const response = await this.program.provider.sendAndConfirm(versionedTransaction);
+
+      if (!this.program.provider.publicKey) return;
+      
+      return response;
     } catch (e) {
       console.log(e);
       return null;
