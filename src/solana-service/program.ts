@@ -7,7 +7,6 @@ import { Escrow } from "./idlType";
 import { config } from "./config";
 import { randomBytes } from "crypto";
 import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { tokenProgram } from "@metaplex-foundation/js";
 
 const TOKEN_PROGRAM = TOKEN_PROGRAM_ID
 
