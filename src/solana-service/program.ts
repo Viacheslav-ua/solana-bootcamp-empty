@@ -6,9 +6,8 @@ import escrowIdl from "./escrow.json";
 import { Escrow } from "./idlType";
 import { config } from "./config";
 import { randomBytes } from "crypto";
-import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-
-const TOKEN_PROGRAM = TOKEN_PROGRAM_ID
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { getTokenProgramId } from "./get-token-pogram";
 
 export class EscrowProgram {
   protected program: Program<Escrow>;
@@ -49,21 +48,21 @@ export class EscrowProgram {
         tokenMintA,
         offerAddress,
         true,
-        TOKEN_PROGRAM,
+        await getTokenProgramId(tokenMintA, this.connection),
       )
 
       const makerTokenAccountA = getAssociatedTokenAddressSync(
         tokenMintA,
         this.wallet.publicKey,
         true,
-        TOKEN_PROGRAM,
+        await getTokenProgramId(tokenMintA, this.connection),
       )
 
       const makerTokenAccountB = getAssociatedTokenAddressSync(
         tokenMintB,
         this.wallet.publicKey,
         true,
-        TOKEN_PROGRAM,
+        await getTokenProgramId(tokenMintB, this.connection),
       )
 
       const accounts = {
@@ -78,7 +77,7 @@ export class EscrowProgram {
 
       const txInstruction = await this.program.methods
         .makeOffer(offerId, new BN(tokenAmountA), new BN(tokenAmountB))
-        .accounts({ ...accounts, tokenProgram: TOKEN_PROGRAM })
+        .accounts({ ...accounts, tokenProgram: await getTokenProgramId(tokenMintA, this.connection)})
         .instruction();
 
 
@@ -115,28 +114,28 @@ export class EscrowProgram {
         tokenMintA,
         this.wallet.publicKey,
         true,
-        TOKEN_PROGRAM,
+        await getTokenProgramId(tokenMintA, this.connection),
       )
 
       const takerTokenAccountB = getAssociatedTokenAddressSync(
         tokenMintB,
         maker,
         true,
-        TOKEN_PROGRAM,
+        await getTokenProgramId(tokenMintB, this.connection),
       )
 
       const makerTokenAccountB = getAssociatedTokenAddressSync(
         tokenMintB,
         this.wallet.publicKey,
         true,
-        TOKEN_PROGRAM,
+        await getTokenProgramId(tokenMintB, this.connection),
       )
 
       const vault = getAssociatedTokenAddressSync(
         tokenMintA,
         offer,
         true,
-        TOKEN_PROGRAM,
+        await getTokenProgramId(tokenMintA, this.connection),
       )
 
       const accounts = {
@@ -147,7 +146,7 @@ export class EscrowProgram {
         takerTokenAccountA,
         takerTokenAccountB,
         vault,
-        tokenProgram: TOKEN_PROGRAM,
+        tokenProgram: await getTokenProgramId(tokenMintA, this.connection),
         makerTokenAccountB,
       }
 
